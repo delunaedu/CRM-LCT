@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CRM B2B</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #f5f3ef;
+    --bg2:      #ffffff;
+    --bg3:      #edeae4;
+    --bg4:      #e4e0d8;
+    --border:   #ddd9d0;
+    --border2:  #ccc8be;
+    --text:     #1a1916;
+    --text2:    #5a5650;
+    --text3:    #9a9590;
+    --ink:      #2c2a26;
+    --accent:   #b85c00;
+    --accent2:  #f97316;
+    --accent-bg:#fff3e8;
+    --accent-bd:#fcd7aa;
+    --green:    #166534;
+    --green-bg: #dcfce7;
+    --green-bd: #86efac;
+    --blue:     #1e40af;
+    --blue-bg:  #dbeafe;
+    --blue-bd:  #93c5fd;
+    --red:      #991b1b;
+    --red-bg:   #fee2e2;
+    --red-bd:   #fca5a5;
+    --gray-bg:  #f1ede6;
+    --gray-bd:  #d4cfc6;
+    --shadow:   0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow2:  0 4px 12px rgba(0,0,0,0.08);
+    --font:     'DM Sans', sans-serif;
+    --mono:     'DM Mono', monospace;
+    --r:        10px;
+    --r-sm:     6px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+
+  /* TOP BAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; height: 52px; box-shadow: var(--shadow);
+  }
+  .logo { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--accent); letter-spacing: 0.04em; }
+  .logo em { color: var(--text3); font-style: normal; }
+  .sync-pill {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3);
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .dot.ok      { background: #22c55e; }
+  .dot.err     { background: #ef4444; }
+  .dot.loading { background: var(--accent2); animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* TAB NAV */
+  .tabnav {
+    position: sticky; top: 52px; z-index: 90;
+    background: var(--bg2); border-bottom: 2px solid var(--border);
+    display: flex; overflow-x: auto; scrollbar-width: none;
+  }
+  .tabnav::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1; min-width: 72px; max-width: 130px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 10px 6px 8px; cursor: pointer;
+    font-size: 11px; font-weight: 500; color: var(--text3);
+    letter-spacing: 0.03em; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: color .15s, border-color .15s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .tab .ti { font-size: 19px; }
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  .main { padding: 20px 16px 80px; max-width: 720px; margin: 0 auto; }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn .15s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+  /* PAGE HEADER */
+  .ph { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .ph h2 { font-size: 20px; font-weight: 600; color: var(--ink); }
+  .ph p  { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-family: var(--font); font-weight: 500; border-radius: var(--r-sm); transition: all .15s; border: none; line-height: 1; }
+  .btn-accent  { background: var(--accent); color: #fff; padding: 9px 16px; font-size: 13px; box-shadow: var(--shadow); }
+  .btn-accent:hover  { background: #9a4d00; }
+  .btn-outline { background: var(--bg2); border: 1px solid var(--border2); color: var(--text2); padding: 7px 13px; font-size: 12px; }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost   { background: none; border: none; color: var(--text3); padding: 5px 9px; font-size: 12px; cursor: pointer; font-family: var(--font); }
+  .btn-ghost:hover { color: var(--accent); }
+  .btn-del     { background: none; border: none; color: var(--text3); padding: 5px 8px; font-size: 14px; cursor: pointer; line-height: 1; }
+  .btn-del:hover { color: var(--red); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* SEARCH */
+  .searchbar { display: flex; gap: 8px; margin-bottom: 14px; }
+  .searchbar input, .searchbar select {
+    background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 12px; border-radius: var(--r-sm);
+    font-family: var(--font); font-size: 13px; outline: none; box-shadow: var(--shadow);
+    -webkit-appearance: none;
+  }
+  .searchbar input { flex: 1; }
+  .searchbar input::placeholder { color: var(--text3); }
+  .searchbar input:focus, .searchbar select:focus { border-color: var(--accent); }
+  .searchbar select { color: var(--text2); font-size: 12px; cursor: pointer; background: var(--bg2); }
+
+  /* CARDS */
+  .card-list { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px 16px;
+    box-shadow: var(--shadow); cursor: pointer;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .card:hover { box-shadow: var(--shadow2); border-color: var(--border2); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 500; }
+  .avatar-org  { background: var(--accent-bg); border: 1px solid var(--accent-bd); color: var(--accent); }
+  .avatar-pers { background: var(--blue-bg);   border: 1px solid var(--blue-bd);   color: var(--blue); }
+  .card-name  { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .card-sub   { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .card-meta  { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .cf         { font-size: 12px; color: var(--text2); }
+  .cf span    { font-size: 11px; color: var(--text3); display: block; }
+  .card-foot  { display: flex; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid; white-space: nowrap; }
+  .b-green { background: var(--green-bg);  color: var(--green); border-color: var(--green-bd); }
+  .b-amber { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
+  .b-gray  { background: var(--gray-bg);   color: var(--text2);  border-color: var(--gray-bd); }
+  .b-blue  { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue-bd); }
+  .b-red   { background: var(--red-bg);    color: var(--red);    border-color: var(--red-bd); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; box-shadow: var(--shadow); }
+  .stat-n { font-size: 26px; font-weight: 600; color: var(--accent); font-family: var(--mono); line-height: 1; }
+  .stat-l { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 48px 24px; color: var(--text3); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty p { font-size: 13px; line-height: 1.7; }
+
+  /* DETAIL */
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+  .breadcrumb a { cursor: pointer; color: var(--accent); }
+  .detail-hero { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .hero-top  { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .hero-av   { width: 48px; height: 48px; border-radius: 10px; background: var(--accent-bg); border: 1px solid var(--accent-bd); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); flex-shrink: 0; }
+  .hero-name { font-size: 18px; font-weight: 600; color: var(--ink); }
+  .hero-sub  { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ml { font-size: 10px; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; }
+  .mv { font-size: 13px; color: var(--text); margin-top: 2px; word-break: break-word; }
+  .section-h { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 14px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center; }
+  .inter-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 15px; margin-bottom: 8px; box-shadow: var(--shadow); }
+  .inter-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .inter-tipo { font-size: 12px; font-weight: 600; color: var(--accent); font-family: var(--mono); }
+  .inter-date { font-size: 11px; color: var(--text3); }
+  .inter-txt  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .inter-next { font-size: 12px; color: var(--accent); margin-top: 6px; }
+  .inter-who  { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* MODAL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(15,14,13,.45); z-index: 200; align-items: flex-end; justify-content: center; }
+  .overlay.open { display: flex; }
+  @media (min-width: 520px) { .overlay { align-items: center; } }
+  .modal {
+    background: var(--bg2); width: 100%; max-width: 480px;
+    border-radius: 18px 18px 0 0; max-height: 92vh; overflow-y: auto;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.12);
+    animation: slideUp .22s ease;
+  }
+  @media (min-width: 520px) { .modal { border-radius: var(--r); max-height: 88vh; } }
+  @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:none;opacity:1} }
+  .handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 10px auto 0; }
+  @media (min-width: 520px) { .handle { display: none; } }
+  .mhead { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
+  .mhead h3 { font-size: 15px; font-weight: 600; }
+  .mx { background: var(--bg3); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px; color: var(--text2); display: flex; align-items: center; justify-content: center; }
+  .mx:hover { background: var(--bg4); color: var(--text); }
+  .mbody { padding: 18px 20px; }
+  .mfoot { display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 20px; border-top: 1px solid var(--border); }
+
+  /* FORM */
+  .fg { margin-bottom: 14px; }
+  .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label { display: block; font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.04em; margin-bottom: 5px; text-transform: uppercase; }
+  input[type=text],input[type=email],input[type=tel],input[type=url],input[type=date],select,textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 12px; border-radius: var(--r-sm);
+    font-family: var(--font); font-size: 13px; outline: none; -webkit-appearance: none;
+  }
+  input:focus,select:focus,textarea:focus { border-color: var(--accent); background: var(--bg2); }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
+
+  /* CONFIG PANEL */
+  .config-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; box-shadow: var(--shadow); }
+  .config-card + .config-card { margin-top: 14px; }
+
+  /* TOAST */
+  #toast { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; z-index: 500; box-shadow: var(--shadow2); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">CRM<em>·B2B</em></div>
+  <div class="sync-pill">
+    <div class="dot" id="sync-dot"></div>
+    <span id="sync-label">sin configurar</span>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div class="tabnav">
+  <div class="tab active" id="tab-empresas" onclick="showView('empresas')">
+    <span class="ti">🏢</span>Empresas
+  </div>
+  <div class="tab" id="tab-contactos" onclick="showView('contactos')">
+    <span class="ti">👤</span>Contactos
+  </div>
+  <div class="tab" id="tab-interacciones" onclick="showView('interacciones')">
+    <span class="ti">💬</span>Registro
+  </div>
+  <div class="tab" id="tab-config" onclick="showView('config')">
+    <span class="ti">⚙️</span>Config
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- EMPRESAS -->
+  <div class="view active" id="view-empresas">
+    <div class="ph">
+      <div><h2>Empresas</h2><p id="emp-count">—</p></div>
+      <button class="btn btn-accent" onclick="openModal('empresa')">+ Nueva</button>
+    </div>
+    <div class="searchbar">
+      <input type="text" id="s-emp" placeholder="Buscar empresa…" oninput="renderEmpresas()">
+      <select id="f-sector" onchange="renderEmpresas()"><option value="">Todos</option></select>
+    </div>
+    <div class="card-list" id="list-emp"></div>
+  </div>
+
+  <!-- DETALLE EMPRESA -->
+  <div class="view" id="view-detalle">
+    <div class="breadcrumb">
+      <a onclick="showView('empresas')">← Empresas</a> <span>/</span>
+      <span id="bread-emp" style="color:var(--text)">—</span>
+    </div>
+    <div class="detail-hero">
+      <div class="hero-top">
+        <div class="hero-av" id="dh-av">AC</div>
+        <div>
+          <div class="hero-name" id="dh-name">—</div>
+          <div class="hero-sub"  id="dh-sub">—</div>
+        </div>
+      </div>
+      <div class="meta-grid" id="dh-meta"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn btn-outline btn-sm" onclick="editCurrentEmp()">Editar</button>
+        <button class="btn btn-accent  btn-sm" onclick="openModal('interaccion',null,curEmpId)">+ Interacción</button>
+        <button class="btn btn-outline btn-sm" onclick="openModal('contacto',null,curEmpId)">+ Contacto</button>
+      </div>
+    </div>
+    <div class="section-h">Contactos
+      <button class="btn btn-outline btn-sm" onclick="openModal('contacto',null,curEmpId)">+</button>
+    </div>
+    <div class="card-list" id="dh-cts"></div>
+    <div class="section-h" style="margin-top:16px">Interacciones
+      <button class="btn btn-outline btn-sm" onclick="openModal('interaccion',null,curEmpId)">+</button>
+    </div>
+    <div id="dh-ints"></div>
+  </div>
+
+  <!-- CONTACTOS -->
+  <div class="view" id="view-contactos">
+    <div class="ph">
+      <div><h2>Contactos</h2><p id="ct-count">—</p></div>
+      <button class="btn btn-accent" onclick="openModal('contacto')">+ Nuevo</button>
+    </div>
+    <div class="searchbar">
+      <input type="text" id="s-ct" placeholder="Buscar contacto…" oninput="renderContactos()">
+      <select id="f-emp-ct" onchange="renderContactos()"><option value="">Todas las empresas</option></select>
+    </div>
+    <div class="card-list" id="list-ct"></div>
+  </div>
+
+  <!-- INTERACCIONES -->
+  <div class="view" id="view-interacciones">
+    <div class="ph">
+      <div><h2>Registro</h2><p id="int-count">—</p></div>
+      <button class="btn btn-accent" onclick="openModal('interaccion')">+ Registrar</button>
+    </div>
+    <div class="stats-row" id="int-stats"></div>
+    <div class="searchbar">
+      <input type="text" id="s-int" placeholder="Buscar…" oninput="renderInter()">
+      <select id="f-tipo" onchange="renderInter()">
+        <option value="">Todos</option>
+        <option>VISITA</option><option>LLAMADA</option><option>CORREO</option>
+        <option>REUNIÓN</option><option>DEMO</option><option>OTRO</option>
+      </select>
+    </div>
+    <div class="card-list" id="list-int"></div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="view" id="view-config">
+    <div class="ph"><div><h2>Configuración</h2><p>Conexión con Google Sheets</p></div></div>
+    <div class="config-card">
+      <div class="fg">
+        <label>URL de la Web App (Apps Script)</label>
+        <input type="url" id="gs-url" placeholder="https://script.google.com/macros/s/…/exec" oninput="saveConfig()">
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-accent" onclick="testConn()">Probar conexión</button>
+        <span id="test-res" style="font-size:12px;color:var(--text3)"></span>
+      </div>
+    </div>
+    <div class="config-card">
+      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:6px">
+        <strong>¿Cómo obtener la URL?</strong>
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.8">
+        El código Apps Script y las instrucciones paso a paso están disponibles en el chat donde obtuviste este archivo. Pega la URL aquí una vez que hayas desplegado tu Web App con acceso <em>"Cualquier persona"</em>.
+      </p>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="syncAll()">↻ Sincronizar ahora</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL EMPRESA -->
+<div class="overlay" id="modal-empresa">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="mhead"><h3 id="me-title">Nueva empresa</h3><button class="mx" onclick="closeModal('empresa')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="e-id">
+      <div class="frow">
+        <div class="fg"><label>Nombre *</label><input type="text" id="e-nombre"></div>
+        <div class="fg"><label>Sector</label><input type="text" id="e-sector"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Ciudad</label><input type="text" id="e-ciudad"></div>
+        <div class="fg"><label>País</label><input type="text" id="e-pais"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Teléfono</label><input type="tel" id="e-telefono"></div>
+        <div class="fg"><label>Sitio web</label><input type="url" id="e-web" placeholder="https://"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>RFC</label><input type="text" id="e-rfc"></div>
+        <div class="fg"><label>Estado</label>
+          <select id="e-estado"><option>Prospecto</option><option>Cliente activo</option><option>Cliente inactivo</option><option>Perdido</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Notas</label><textarea id="e-notas"></textarea></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-outline" onclick="closeModal('empresa')">Cancelar</button>
+      <button class="btn btn-accent" onclick="saveEmpresa()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTACTO -->
+<div class="overlay" id="modal-contacto">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="mhead"><h3 id="mc-title">Nuevo contacto</h3><button class="mx" onclick="closeModal('contacto')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="c-id">
+      <div class="frow">
+        <div class="fg"><label>Nombre *</label><input type="text" id="c-nombre"></div>
+        <div class="fg"><label>Apellidos</label><input type="text" id="c-apellidos"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Empresa</label><select id="c-empresa"></select></div>
+        <div class="fg"><label>Cargo</label><input type="text" id="c-cargo"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Email</label><input type="email" id="c-email"></div>
+        <div class="fg"><label>Teléfono</label><input type="tel" id="c-telefono"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>LinkedIn</label><input type="url" id="c-linkedin" placeholder="https://"></div>
+        <div class="fg"><label>Estado</label>
+          <select id="c-estado"><option>Activo</option><option>Inactivo</option><option>No contactar</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Notas</label><textarea id="c-notas"></textarea></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-outline" onclick="closeModal('contacto')">Cancelar</button>
+      <button class="btn btn-accent" onclick="saveContacto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INTERACCIÓN -->
+<div class="overlay" id="modal-interaccion">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="mhead"><h3>Registrar interacción</h3><button class="mx" onclick="closeModal('interaccion')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="i-id">
+      <div class="frow">
+        <div class="fg"><label>Fecha *</label><input type="date" id="i-fecha"></div>
+        <div class="fg"><label>Tipo</label>
+          <select id="i-tipo"><option>VISITA</option><option>LLAMADA</option><option>CORREO</option><option>REUNIÓN</option><option>DEMO</option><option>OTRO</option></select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Empresa</label><select id="i-empresa" onchange="syncCtSel()"></select></div>
+        <div class="fg"><label>Contacto</label><select id="i-contacto"></select></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Responsable</label><input type="text" id="i-resp"></div>
+        <div class="fg"><label>Resultado</label>
+          <select id="i-resultado"><option>Positivo</option><option>Neutro</option><option>Negativo</option><option>Pendiente</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Notas / Resumen</label><textarea id="i-notas" rows="3" placeholder="Describe la interacción…"></textarea></div>
+      <div class="fg"><label>Próxima acción</label><input type="text" id="i-sig" placeholder="Ej: Enviar propuesta el viernes"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-outline" onclick="closeModal('interaccion')">Cancelar</button>
+      <button class="btn btn-accent" onclick="saveInter()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let GS_URL = '';
+let empresas = [], contactos = [], interacciones = [];
+let curEmpId = null;
+let editing = { empresa: null, contacto: null };
+
+function init() {
+  GS_URL = localStorage.getItem('crm_gs_url') || '';
+  document.getElementById('gs-url').value = GS_URL;
+  document.getElementById('i-fecha').value = today();
+  if (GS_URL) syncAll(); else setSyncState('none');
+}
+
+const today = () => new Date().toISOString().split('T')[0];
+const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+// NAVIGATION
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const v = document.getElementById('view-' + name);
+  const t = document.getElementById('tab-' + name);
+  if (v) v.classList.add('active');
+  if (t) t.classList.add('active');
+  if (name === 'empresas')      renderEmpresas();
+  if (name === 'contactos')     { renderContactos(); popEmpFilterCt(); }
+  if (name === 'interacciones') renderInter();
+  window.scrollTo(0, 0);
+}
+
+// SYNC
+function saveConfig() {
+  GS_URL = document.getElementById('gs-url').value.trim();
+  localStorage.setItem('crm_gs_url', GS_URL);
+}
+
+async function gsReq(payload) {
+  if (!GS_URL) throw new Error('URL no configurada');
+  setSyncState('loading');
+  const r = await fetch(GS_URL, { method: 'POST', body: JSON.stringify(payload) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  setSyncState('ok');
+  return d;
+}
+
+async function syncAll() {
+  try {
+    setSyncState('loading');
+    const d = await gsReq({ action: 'getAll' });
+    empresas       = d.empresas       || [];
+    contactos      = d.contactos      || [];
+    interacciones  = d.interacciones  || [];
+    setSyncState('ok');
+    renderAll();
+  } catch(e) { setSyncState('err', e.message); }
+}
+
+async function testConn() {
+  const el = document.getElementById('test-res');
+  el.textContent = 'Probando…'; el.style.color = 'var(--text3)';
+  try {
+    await gsReq({ action: 'ping' });
+    el.textContent = '✓ Conexión exitosa'; el.style.color = 'var(--green)';
+    syncAll();
+  } catch(e) { el.textContent = '✗ ' + e.message; el.style.color = 'var(--red)'; }
+}
+
+function setSyncState(s, msg) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'dot';
+  if (s === 'ok')      { dot.classList.add('ok');      lbl.textContent = 'sincronizado'; }
+  else if (s === 'loading') { dot.classList.add('loading'); lbl.textContent = 'sincronizando…'; }
+  else if (s === 'err') { dot.classList.add('err');     lbl.textContent = msg || 'error'; }
+  else                  { lbl.textContent = 'sin configurar'; }
+}
+
+// RENDER ALL
+function renderAll() {
+  renderEmpresas(); renderContactos(); renderInter();
+  popSectorFilter(); popEmpFilterCt(); popEmpSelects();
+}
+
+// RENDER EMPRESAS
+function renderEmpresas() {
+  const q   = (document.getElementById('s-emp').value   || '').toLowerCase();
+  const sec = document.getElementById('f-sector').value;
+  const list = empresas.filter(e =>
+    (!q   || e.nombre.toLowerCase().includes(q) || (e.ciudad||'').toLowerCase().includes(q)) &&
+    (!sec || e.sector === sec)
+  );
+  document.getElementById('emp-count').textContent = list.length + ' empresa' + (list.length !== 1 ? 's' : '');
+  const el = document.getElementById('list-emp');
+  if (!list.length) { el.innerHTML = emptyH('🏢', 'Sin empresas aún.<br>Crea la primera.'); return; }
+  el.innerHTML = list.map(e => {
+    const nc = contactos.filter(c => c.empresa_id === e.id).length;
+    const li = interacciones.filter(i => i.empresa_id === e.id).sort((a,b) => b.fecha.localeCompare(a.fecha))[0];
+    return `<div class="card" onclick="openDetalle('${e.id}')">
+      <div class="card-top">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div class="avatar avatar-org">${initials(e.nombre)}</div>
+          <div><div class="card-name">${e.nombre}</div><div class="card-sub">${[e.sector,e.ciudad].filter(Boolean).join(' · ')||'—'}</div></div>
+        </div>
+        ${badgeEstado(e.estado)}
+      </div>
+      <div class="card-meta">
+        <div class="cf"><span>Contactos</span>${nc}</div>
+        <div class="cf"><span>Última interacción</span>${li ? fmtDate(li.fecha) : '—'}</div>
+        ${e.telefono ? `<div class="cf"><span>Tel</span>${e.telefono}</div>` : ''}
+      </div>
+      <div class="card-foot" onclick="event.stopPropagation()">
+        <button class="btn-ghost" onclick="openModal('empresa','${e.id}')">Editar</button>
+        <button class="btn-ghost" onclick="openModal('interaccion',null,'${e.id}')">+ Interacción</button>
+        <button class="btn-del"   onclick="delRec('empresa','${e.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// DETALLE EMPRESA
+function openDetalle(id) {
+  curEmpId = id;
+  const e = empresas.find(x => x.id === id); if (!e) return;
+  document.getElementById('bread-emp').textContent = e.nombre;
+  document.getElementById('dh-av').textContent     = initials(e.nombre);
+  document.getElementById('dh-name').textContent   = e.nombre;
+  document.getElementById('dh-sub').textContent    = [e.sector, e.ciudad, e.pais].filter(Boolean).join(' · ') || '—';
+  document.getElementById('dh-meta').innerHTML = [
+    ['Teléfono', e.telefono || '—'],
+    ['Web',      e.web ? `<a href="${e.web}" target="_blank" style="color:var(--accent)">${e.web}</a>` : '—'],
+    ['RFC',      e.rfc || '—'],
+    ['Estado',   badgeEstado(e.estado)],
+  ].map(([l,v]) => `<div><div class="ml">${l}</div><div class="mv">${v}</div></div>`).join('');
+
+  const cs = contactos.filter(c => c.empresa_id === id);
+  document.getElementById('dh-cts').innerHTML = cs.length ? cs.map(c =>
+    `<div class="card">
+      <div class="card-top">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="avatar avatar-pers">${initials(c.nombre)}</div>
+          <div><div class="card-name">${c.nombre} ${c.apellidos||''}</div><div class="card-sub">${c.cargo||'—'}</div></div>
+        </div>
+        ${badgeEstado(c.estado)}
+      </div>
+      <div class="card-meta">
+        ${c.email    ? `<div class="cf"><span>Email</span>${c.email}</div>`    : ''}
+        ${c.telefono ? `<div class="cf"><span>Tel</span>${c.telefono}</div>` : ''}
+      </div>
+      <div class="card-foot">
+        <button class="btn-ghost" onclick="openModal('contacto','${c.id}')">Editar</button>
+        <button class="btn-del"   onclick="delRec('contacto','${c.id}')">🗑</button>
+      </div>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:13px;padding:4px 0">Sin contactos aún.</p>';
+
+  const ints = interacciones.filter(i => i.empresa_id === id).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  document.getElementById('dh-ints').innerHTML = ints.length ? ints.map(i => {
+    const ct = contactos.find(c => c.id === i.contacto_id);
+    return `<div class="inter-card">
+      <div class="inter-top">
+        <span class="inter-tipo">${i.tipo}</span>
+        <span class="inter-date">${fmtDate(i.fecha)}</span>
+      </div>
+      <div class="inter-txt">${i.notas || '—'}</div>
+      ${i.siguiente ? `<div class="inter-next">→ ${i.siguiente}</div>` : ''}
+      <div class="inter-who">${ct ? ct.nombre+' '+(ct.apellidos||'') : '—'} · ${i.responsable||'—'} · ${i.resultado||'—'}</div>
+    </div>`;
+  }).join('') : '<p style="color:var(--text3);font-size:13px;padding:4px 0">Sin interacciones aún.</p>';
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-detalle').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function editCurrentEmp() { if (curEmpId) openModal('empresa', curEmpId); }
+
+// RENDER CONTACTOS
+function renderContactos() {
+  const q   = (document.getElementById('s-ct').value || '').toLowerCase();
+  const eid = document.getElementById('f-emp-ct').value;
+  const list = contactos.filter(c =>
+    (!q   || (c.nombre+' '+(c.apellidos||'')).toLowerCase().includes(q) || (c.cargo||'').toLowerCase().includes(q)) &&
+    (!eid || c.empresa_id === eid)
+  );
+  document.getElementById('ct-count').textContent = list.length + ' contacto' + (list.length !== 1 ? 's' : '');
+  const el = document.getElementById('list-ct');
+  if (!list.length) { el.innerHTML = emptyH('👤', 'Sin contactos aún.'); return; }
+  el.innerHTML = list.map(c => {
+    const emp = empresas.find(e => e.id === c.empresa_id);
+    return `<div class="card">
+      <div class="card-top">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="avatar avatar-pers">${initials(c.nombre)}</div>
+          <div>
+            <div class="card-name">${c.nombre} ${c.apellidos||''}</div>
+            <div class="card-sub">${c.cargo||'—'}${emp?' · '+emp.nombre:''}</div>
+          </div>
+        </div>
+        ${badgeEstado(c.estado)}
+      </div>
+      <div class="card-meta">
+        ${c.email    ? `<div class="cf"><span>Email</span>${c.email}</div>`    : ''}
+        ${c.telefono ? `<div class="cf"><span>Tel</span>${c.telefono}</div>` : ''}
+      </div>
+      <div class="card-foot">
+        <button class="btn-ghost" onclick="openModal('contacto','${c.id}')">Editar</button>
+        ${emp ? `<button class="btn-ghost" onclick="openDetalle('${emp.id}')">Ver empresa</button>` : ''}
+        <button class="btn-del" onclick="delRec('contacto','${c.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// RENDER INTERACCIONES
+function renderInter() {
+  const q    = (document.getElementById('s-int').value || '').toLowerCase();
+  const tipo = document.getElementById('f-tipo').value;
+  const list = interacciones.filter(i =>
+    (!q    || (i.notas||'').toLowerCase().includes(q) || getEmpN(i.empresa_id).toLowerCase().includes(q)) &&
+    (!tipo || i.tipo === tipo)
+  ).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  document.getElementById('int-count').textContent = list.length + ' interacción' + (list.length !== 1 ? 'es' : '');
+
+  const thisM = new Date().toISOString().slice(0,7);
+  document.getElementById('int-stats').innerHTML = [
+    { n: interacciones.length, l: 'Total' },
+    { n: interacciones.filter(i => i.fecha && i.fecha.startsWith(thisM)).length, l: 'Este mes' },
+    { n: interacciones.filter(i => i.siguiente).length, l: 'Con seguimiento' },
+  ].map(s => `<div class="stat"><div class="stat-n">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
+
+  const el = document.getElementById('list-int');
+  if (!list.length) { el.innerHTML = emptyH('💬', 'Sin interacciones aún.'); return; }
+  const tipoCls = { VISITA:'b-green', LLAMADA:'b-blue', CORREO:'b-gray', 'REUNIÓN':'b-amber', DEMO:'b-amber', OTRO:'b-gray' };
+  el.innerHTML = list.map(i => {
+    const ct = contactos.find(c => c.id === i.contacto_id);
+    return `<div class="card">
+      <div class="card-top">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span class="badge ${tipoCls[i.tipo]||'b-gray'}">${i.tipo}</span>
+            <span style="font-size:12px;color:var(--text3)">${fmtDate(i.fecha)}</span>
+          </div>
+          <div class="card-name" style="font-size:13px">${getEmpN(i.empresa_id)}</div>
+          <div class="card-sub">${ct ? ct.nombre+' '+(ct.apellidos||'') : '—'} · ${i.responsable||'—'}</div>
+        </div>
+        <span class="badge ${resBadge(i.resultado)}" style="flex-shrink:0">${i.resultado||'—'}</span>
+      </div>
+      ${i.notas ? `<div style="font-size:13px;color:var(--text2);margin-top:8px;line-height:1.6">${i.notas}</div>` : ''}
+      ${i.siguiente ? `<div style="font-size:12px;color:var(--accent);margin-top:6px">→ ${i.siguiente}</div>` : ''}
+      <div class="card-foot">
+        <button class="btn-ghost" onclick="openModal('interaccion','${i.id}')">Editar</button>
+        <button class="btn-del"   onclick="delRec('interaccion','${i.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// MODALS
+function openModal(type, id=null, ctxEmpId=null) {
+  popEmpSelects();
+  if (type === 'empresa') {
+    editing.empresa = id;
+    const e = id ? empresas.find(x=>x.id===id) : null;
+    document.getElementById('me-title').textContent = id ? 'Editar empresa' : 'Nueva empresa';
+    ['id','nombre','sector','ciudad','pais','telefono','web','rfc','notas'].forEach(f =>
+      document.getElementById('e-'+f).value = e ? (e[f]||'') : (f==='pais'?'México':''));
+    if (e) document.getElementById('e-estado').value = e.estado || 'Prospecto';
+  } else if (type === 'contacto') {
+    editing.contacto = id;
+    const c = id ? contactos.find(x=>x.id===id) : null;
+    document.getElementById('mc-title').textContent = id ? 'Editar contacto' : 'Nuevo contacto';
+    ['id','nombre','apellidos','cargo','email','telefono','linkedin','notas'].forEach(f =>
+      document.getElementById('c-'+f).value = c ? (c[f]||'') : '');
+    if (c) document.getElementById('c-estado').value = c.estado || 'Activo';
+    document.getElementById('c-empresa').value = c ? (c.empresa_id||'') : (ctxEmpId||'');
+  } else if (type === 'interaccion') {
+    const i = id ? interacciones.find(x=>x.id===id) : null;
+    document.getElementById('i-id').value    = i ? i.id : '';
+    document.getElementById('i-fecha').value = i ? i.fecha : today();
+    document.getElementById('i-tipo').value  = i ? i.tipo  : 'VISITA';
+    document.getElementById('i-resp').value  = i ? (i.responsable||'') : '';
+    document.getElementById('i-resultado').value = i ? (i.resultado||'Neutro') : 'Neutro';
+    document.getElementById('i-notas').value = i ? (i.notas||'') : '';
+    document.getElementById('i-sig').value   = i ? (i.siguiente||'') : '';
+    document.getElementById('i-empresa').value = i ? (i.empresa_id||'') : (ctxEmpId||'');
+    syncCtSel();
+    if (i) document.getElementById('i-contacto').value = i.contacto_id || '';
+  }
+  document.getElementById('modal-'+type).classList.add('open');
+}
+
+function closeModal(t) { document.getElementById('modal-'+t).classList.remove('open'); }
+
+function syncCtSel() {
+  const eid = document.getElementById('i-empresa').value;
+  const cs  = eid ? contactos.filter(c => c.empresa_id === eid) : contactos;
+  document.getElementById('i-contacto').innerHTML = '<option value="">— sin contacto —</option>' +
+    cs.map(c => `<option value="${c.id}">${c.nombre} ${c.apellidos||''}</option>`).join('');
+}
+
+// SAVE
+async function saveEmpresa() {
+  const nombre = document.getElementById('e-nombre').value.trim();
+  if (!nombre) { toast('El nombre es requerido'); return; }
+  const old = editing.empresa ? empresas.find(e=>e.id===editing.empresa) : null;
+  const rec = { id: editing.empresa || genId(), nombre,
+    sector:   document.getElementById('e-sector').value,
+    ciudad:   document.getElementById('e-ciudad').value,
+    pais:     document.getElementById('e-pais').value,
+    telefono: document.getElementById('e-telefono').value,
+    web:      document.getElementById('e-web').value,
+    rfc:      document.getElementById('e-rfc').value,
+    estado:   document.getElementById('e-estado').value,
+    notas:    document.getElementById('e-notas').value,
+    creado:   old ? old.creado : new Date().toISOString(),
+  };
+  try {
+    await gsReq({ action:'upsert', sheet:'empresas', record:rec });
+    empresas = editing.empresa ? empresas.map(e=>e.id===rec.id?rec:e) : [...empresas, rec];
+    closeModal('empresa'); editing.empresa = null; renderAll(); toast('Empresa guardada ✓');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function saveContacto() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  if (!nombre) { toast('El nombre es requerido'); return; }
+  const old = editing.contacto ? contactos.find(c=>c.id===editing.contacto) : null;
+  const rec = { id: editing.contacto || genId(), nombre,
+    apellidos:  document.getElementById('c-apellidos').value,
+    empresa_id: document.getElementById('c-empresa').value,
+    cargo:      document.getElementById('c-cargo').value,
+    email:      document.getElementById('c-email').value,
+    telefono:   document.getElementById('c-telefono').value,
+    linkedin:   document.getElementById('c-linkedin').value,
+    estado:     document.getElementById('c-estado').value,
+    notas:      document.getElementById('c-notas').value,
+    creado:     old ? old.creado : new Date().toISOString(),
+  };
+  try {
+    await gsReq({ action:'upsert', sheet:'contactos', record:rec });
+    contactos = editing.contacto ? contactos.map(c=>c.id===rec.id?rec:c) : [...contactos, rec];
+    closeModal('contacto'); editing.contacto = null; renderAll();
+    if (curEmpId) openDetalle(curEmpId);
+    toast('Contacto guardado ✓');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function saveInter() {
+  const fecha = document.getElementById('i-fecha').value;
+  if (!fecha) { toast('La fecha es requerida'); return; }
+  const iid = document.getElementById('i-id').value;
+  const rec = { id: iid || genId(), fecha,
+    tipo:        document.getElementById('i-tipo').value,
+    empresa_id:  document.getElementById('i-empresa').value,
+    contacto_id: document.getElementById('i-contacto').value,
+    responsable: document.getElementById('i-resp').value,
+    resultado:   document.getElementById('i-resultado').value,
+    notas:       document.getElementById('i-notas').value,
+    siguiente:   document.getElementById('i-sig').value,
+    creado:      new Date().toISOString(),
+  };
+  try {
+    await gsReq({ action:'upsert', sheet:'interacciones', record:rec });
+    interacciones = iid ? interacciones.map(i=>i.id===rec.id?rec:i) : [...interacciones, rec];
+    closeModal('interaccion'); renderAll();
+    if (curEmpId) openDetalle(curEmpId);
+    toast('Interacción guardada ✓');
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function delRec(type, id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  try {
+    await gsReq({ action:'delete', sheet:type+'s', id });
+    if (type==='empresa')     empresas      = empresas.filter(e=>e.id!==id);
+    else if (type==='contacto')    contactos     = contactos.filter(c=>c.id!==id);
+    else if (type==='interaccion') interacciones = interacciones.filter(i=>i.id!==id);
+    renderAll(); toast('Eliminado');
+    if (type === 'empresa' && curEmpId === id) showView('empresas');
+    else if (curEmpId) openDetalle(curEmpId);
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+// HELPERS
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+}
+function initials(n) { return (n||'').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
+function getEmpN(id) { const e = empresas.find(x=>x.id===id); return e ? e.nombre : '—'; }
+
+function badgeEstado(s) {
+  const m = {
+    'Prospecto':'b-amber','Cliente activo':'b-green','Cliente inactivo':'b-gray','Perdido':'b-red',
+    'Activo':'b-green','Inactivo':'b-gray','No contactar':'b-red',
+  };
+  return `<span class="badge ${m[s]||'b-gray'}">${s||'—'}</span>`;
+}
+function resBadge(r) { return {Positivo:'b-green',Negativo:'b-red',Pendiente:'b-amber'}[r]||'b-gray'; }
+
+function popSectorFilter() {
+  const sel = document.getElementById('f-sector'); const cur = sel.value;
+  const secs = [...new Set(empresas.map(e=>e.sector).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Todos</option>' + secs.map(s=>`<option>${s}</option>`).join('');
+  sel.value = cur;
+}
+function popEmpFilterCt() {
+  const sel = document.getElementById('f-emp-ct'); const cur = sel.value;
+  sel.innerHTML = '<option value="">Todas las empresas</option>' +
+    empresas.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('');
+  sel.value = cur;
+}
+function popEmpSelects() {
+  const opts = '<option value="">— sin empresa —</option>' +
+    empresas.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('');
+  document.getElementById('c-empresa').innerHTML = opts;
+  document.getElementById('i-empresa').innerHTML = opts;
+}
+function emptyH(icon, msg) {
+  return `<div class="empty"><div class="empty-icon">${icon}</div><p>${msg}</p></div>`;
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._t); t._t = setTimeout(()=>t.style.display='none', 3000);
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.overlay').forEach(o =>
+  o.addEventListener('click', e => { if (e.target===o) o.classList.remove('open'); })
+);
+
+init();
+</script>
+</body>
+</html>
